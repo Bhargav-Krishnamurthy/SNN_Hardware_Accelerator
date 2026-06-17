@@ -41,7 +41,7 @@ module hdc_encoder_tb;
         vector3 = 16'b0011110000111100;
         vector4 = 16'b1111000010101010;
 
-        shift_amt1 = 1;
+        shift_amt1 = 0;
         shift_amt2 = 3;
         shift_amt3 = 2;
         shift_amt4 = 5;

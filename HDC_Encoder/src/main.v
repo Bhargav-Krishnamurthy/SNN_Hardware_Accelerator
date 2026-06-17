@@ -11,12 +11,11 @@ module hdc_encoder #(parameter D = 16) (
 );
     wire [D-1:0] shifted1, shifted2, shifted3, shifted4;
 
-    assign shifted1 = (vector1 << shift_amt1) | (vector1 >> (D - shift_amt1));
-    assign shifted2 = (vector2 << shift_amt2) |(vector2 >> (D - shift_amt2));
-
-    assign shifted3 = (vector3 << shift_amt3) |(vector3 >> (D - shift_amt3));
-
-    assign shifted4 =(vector4 << shift_amt4) |(vector4 >> (D - shift_amt4));
+    // cyclic left shift for each vector   
+    assign shifted1 = ({vector1,vector1} << shift_amt1) >> D;
+    assign shifted2 = ({vector2,vector2} << shift_amt2) >> D;
+    assign shifted3 = ({vector3,vector3} << shift_amt3) >> D;
+    assign shifted4 = ({vector4,vector4} << shift_amt4) >> D;
        
     assign shifted = shifted1 ^ shifted2 ^ shifted3 ^ shifted4;
 
