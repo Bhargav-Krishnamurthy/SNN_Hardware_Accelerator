@@ -153,3 +153,42 @@ save_mem(W2_q, "weights/W2.mem")
 print("\nDone. In your Verilog testbench, load weights like this:")
 print('  $readmemh("weights/W1.mem", weight_bram_layer1);')
 print('  $readmemh("weights/W2.mem", weight_bram_layer2);')
+
+
+# ── Export one test image as spike trains ─────────────────────
+from torchvision import datasets, transforms
+
+# grab first test image
+test_data  = datasets.MNIST(root="data", train=False, download=True, 
+                             transform=transforms.ToTensor())
+img, label = test_data[0]
+img_flat   = img.view(-1)          # 784 floats, 0.0–1.0
+
+print(f"True label: {label}")
+
+# rate encode — same as training
+torch.manual_seed(42)              # fixed seed = reproducible spikes
+spike_trains = rate_encode(img_flat.unsqueeze(0), N_STEPS)  # [25, 1, 784]
+
+# save each timestep as a .mem file
+os.makedirs("weights/spikes", exist_ok=True)
+for t in range(N_STEPS):
+    spk = spike_trains[t, 0].numpy().astype(int)  # 784 bits
+    
+    # pack 784 bits into 98 bytes (784/8 = 98), save as hex
+    # but for simplicity save as one hex word per 32 bits
+    # easiest: save as 784 individual lines of 0 or 1
+    with open(f"weights/spikes/spike_t{t:02d}.mem", "w") as f:
+        # pack into 32-bit words (784 bits = 24 words + 16 bits)
+        # pad to 800 bits (25 words of 32 bits)
+        padded = np.zeros(800, dtype=int)
+        padded[:784] = spk
+        for w in range(25):
+            word = 0
+            for b in range(32):
+                word |= (int(padded[w*32 + b]) << b)
+            f.write(f"{word:08X}\n")
+
+print("Saved spike files to weights/spikes/")
+print(f"Feed these to Verilog in order: spike_t00.mem → spike_t24.mem")
+print(f"Expected output class: {label}")

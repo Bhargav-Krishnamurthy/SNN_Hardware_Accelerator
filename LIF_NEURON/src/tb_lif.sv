@@ -1,30 +1,11 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 06/16/2026 12:22:21 PM
-// Design Name: 
-// Module Name: tb_lif
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 
 module tb_lif;
 
     // parameters 
     localparam BITWIDTH  = 16;
-    localparam THRESHOLD = 100;
+    localparam THRESHOLD = 17774;
     localparam N_INPUTS  = 4;
 
     reg                        clk;

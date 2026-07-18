@@ -1,30 +1,12 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 06/16/2026 11:21:01 AM
-// Design Name: 
-// Module Name: lif
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
+
 
 
 module lif #(
 
     parameter BITWIDTH = 16,
     parameter N_INPUTS = 784,
-    parameter THRESHOLD = 1
+    parameter THRESHOLD = 17774
     
 )(
     input wire rst,
