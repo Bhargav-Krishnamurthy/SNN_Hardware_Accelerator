@@ -33,8 +33,28 @@ module tb_top;
         $readmemh("spike_t00.mem", spike_mem[0]);
         $readmemh("spike_t01.mem", spike_mem[1]);
         $readmemh("spike_t02.mem", spike_mem[2]);
-        // ... repeat for all 25
-        $readmemh("spike_t24.mem", spike_mem[24]);
+        $readmemh("spike_t02.mem", spike_mem[3]);
+        $readmemh("spike_t02.mem", spike_mem[4]);
+        $readmemh("spike_t02.mem", spike_mem[5]);
+        $readmemh("spike_t02.mem", spike_mem[6]);
+        $readmemh("spike_t02.mem", spike_mem[7]);
+        $readmemh("spike_t02.mem", spike_mem[8]);
+        $readmemh("spike_t02.mem", spike_mem[9]);
+        $readmemh("spike_t02.mem", spike_mem[10]);
+        $readmemh("spike_t02.mem", spike_mem[11]);
+        $readmemh("spike_t02.mem", spike_mem[12]);
+        $readmemh("spike_t02.mem", spike_mem[13]);
+        $readmemh("spike_t02.mem", spike_mem[14]);
+        $readmemh("spike_t02.mem", spike_mem[15]);
+        $readmemh("spike_t02.mem", spike_mem[16]);
+        $readmemh("spike_t02.mem", spike_mem[17]);
+        $readmemh("spike_t02.mem", spike_mem[18]);
+        $readmemh("spike_t02.mem", spike_mem[19]);
+        $readmemh("spike_t02.mem", spike_mem[20]);
+        $readmemh("spike_t02.mem", spike_mem[21]);
+        $readmemh("spike_t02.mem", spike_mem[22]);
+        $readmemh("spike_t02.mem", spike_mem[23]);
+        $readmemh("spike_t02.mem", spike_mem[24]);
     end
 
     // task to pack one timestep into spike_in bus
