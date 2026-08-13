@@ -1,0 +1,75 @@
+ ## How to Test Different Images
+  ### The workflow is 2 steps:
+
+  Step 1 — Generate spike files for any MNIST digit:
+    cd /home/suraj-n/SNN_Hardware_Accelerator
+    
+    # Test image at index 0 (digit = 7)
+    python3 generate_spikes.py --index 0
+    
+    # Test image at index 3 (digit = 0)
+    python3 generate_spikes.py --index 3
+    
+    # Test image at index 1 (digit = 2)
+    python3 generate_spikes.py --index 1
+    
+  The script tells you the expected output:
+
+    True label : 0
+    Expected Verilog output: Predicted class = 0
+    
+  Step 2 — Re-run simulation:
+
+    # Command line (iverilog):
+    cd LIF_NEURON/src
+    iverilog -g2012 -o sim.out lif.sv snn_layer.sv top_level.v tb_top.sv && vvp sim.out
+    
+  Or in Vivado: just click Re-run Simulation (the .mem files are reloaded automatically).
+  ──────
+  ### In Vivado specifically:
+
+  1. Run python3 generate_spikes.py --index <N> --out_dir <path_to_xsim_folder>
+  2. In Vivado TCL console: restart then run all
+  ──────
+  ### Quick reference for MNIST test-set first 10 images:
+
+   Index                                                                                           | True Digit
+  -------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------
+   0                                                                                               | 7
+   1                                                                                               | 2
+   2                                                                                               | 1
+   3                                                                                               | 0
+   4                                                                                               | 4
+   5                                                                                               | 1
+   6                                                                                               | 4
+   7                                                                                               | 9
+   8                                                                                               | 5
+   9                                                                                               | 9 
+   
+    ## The 3 phases
+
+  ### 🔵 Phase 1 — Training (done once, already done)
+
+  snn(1).ipynb trains a 2-layer SNN on MNIST and exports:
+
+  • W1.mem → 128×784 weights for Layer 1
+  • W2.mem → 10×128 weights for Layer 2
+  ──────
+  ### 🟡 Phase 2 — Input Preparation (per test image)
+
+  generate_spikes.py converts a single MNIST image into hardware-ready format:
+
+    python3 generate_spikes.py --index 42
+    # → spike_t00.mem ... spike_t24.mem  (25 files)
+    # → prints: "Expected Verilog output: 9"
+    ──────
+  ### 🔴 Phase 3 — Simulation (Vivado)
+
+  The Verilog reads the .mem files and predicts the digit:
+
+   File                                                                                            | Does what
+  -------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------
+   lif.sv                                                                                          | One neuron — leaks, integrates, fires
+   snn_layer.sv                                                                                    | Full layer of LIF neurons + weight loading
+   top_level.v                                                                                     | Connects both layers + FSM for 25 timesteps
+   tb_top.sv

@@ -1,0 +1,37 @@
+ Here's a summary of all the bugs that were fixed:
+  ──────
+  ## What was wrong & what was fixed
+
+  ### Bug 1 — step_count register overflow (critical)
+
+  In top_level.v, step_count was declared as [$clog2(NUM_STEPS)-1:0] = 4 bits wide (max value 15), but NUM_STEPS=25. So it would never reach 25, causing the FSM to loop forever — that's why the
+  simulation hung.
+
+  Fix: Declared step_count as [4:0] (5 bits, max 31).
+
+  ### Bug 2 — 2D array $readmemh in testbench
+
+  Iverilog does not support $readmemh(file, arr[n]) for 2D arrays. This caused 163 elaboration errors.
+  Fix: Replaced with 25 separate 1D arrays smem_00[]..smem_24[].
+  ### Bug 3 — Weights port was an unpacked array
+  lif.sv used input wire signed [BITWIDTH-1:0] weights [0:N_INPUTS-1] — an unpacked port. Vivado synthesis and iverilog both reject passing array slices into this via continuous assignment.
+
+  Fix: Changed to a flat packed bus input wire [N_INPUTS*BITWIDTH-1:0] weights with $signed(weights[i*BITWIDTH +: BITWIDTH]) for each weight access.
+
+  ### Bug 4 — 16-bit accumulator overflow
+  The membrane was 16-bit but accumulating up to 128 × 9803 ≈ 1.25M, which overflows int16.
+  Fix: Changed membrane and after_integrate to 32-bit signed registers.
+  ### Bug 5 — Reset held layers in reset during operation
+  top_level.v had .rst(rst | ~running) on both layers, resetting membrane potentials whenever the FSM was idle. This wiped state between samples and also kept layers reset at power-on before start.
+
+  Fix: Changed to .rst(rst) only.
+  ### Bug 6 — Testbench spike loading timing
+  The original testbench loaded spike data after posedge clk, so the first cycle always saw zero inputs.
+
+  Fix: Testbench now loads timestep 0 before the start pulse, then advances spike data before each subsequent posedge.
+
+  ### Bug 7 — tb_top spike file bug
+
+  Original testbench repeated spike_t02.mem for timesteps 3-24 instead of loading the actual files.
+
+  Fix: Each spike_t{XX}.mem is correctly loaded into its own array.
