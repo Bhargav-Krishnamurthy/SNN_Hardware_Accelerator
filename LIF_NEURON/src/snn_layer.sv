@@ -1,4 +1,7 @@
 `timescale 1ns/1ps
+// SNN Layer: instantiates NUM_NEURONS LIF neurons sharing a weight BRAM.
+// Weight file format: one 4-digit hex value (signed int16) per line, row-major.
+// Row n contains weights for neuron n: entries n*NUM_INPUTS to n*NUM_INPUTS+NUM_INPUTS-1
 
 module snn_layer #(
     parameter NUM_NEURONS = 128,
@@ -7,32 +10,32 @@ module snn_layer #(
     parameter THRESHOLD   = 17774,
     parameter MEM_FILE    = "W1.mem"
 )(
-    input  wire clk,
-    input  wire rst,
-    input  wire [NUM_INPUTS-1:0]   spike_in,
-    output wire [NUM_NEURONS-1:0]  spike_out
+    input  wire                        clk,
+    input  wire                        rst,
+    input  wire [NUM_INPUTS-1:0]       spike_in,
+    output wire [NUM_NEURONS-1:0]      spike_out
 );
-    // one weight array loaded once — flat [neuron*NUM_INPUTS + input]
+    // Weight storage: flat 1D array loaded from .mem file
     reg signed [BITWIDTH-1:0] w_mem [0:NUM_NEURONS*NUM_INPUTS-1];
 
     initial begin
         $readmemh(MEM_FILE, w_mem);
-        $display("[SNN_LAYER] Loaded %s", MEM_FILE);
+        $display("[SNN_LAYER] Loaded %s (%0d x %0d weights)", MEM_FILE, NUM_NEURONS, NUM_INPUTS);
     end
 
-    // wire weights per neuron
-    wire signed [BITWIDTH-1:0] weights [0:NUM_NEURONS-1][0:NUM_INPUTS-1];
+    // Pack weights into flat buses, one per neuron
+    wire [NUM_INPUTS*BITWIDTH-1:0] neuron_weights [0:NUM_NEURONS-1];
 
     genvar n, i;
     generate
-        for (n = 0; n < NUM_NEURONS; n = n + 1) begin : weight_wire
-            for (i = 0; i < NUM_INPUTS; i = i + 1) begin : input_wire
-                assign weights[n][i] = w_mem[n * NUM_INPUTS + i];
+        for (n = 0; n < NUM_NEURONS; n = n + 1) begin : weight_pack
+            for (i = 0; i < NUM_INPUTS; i = i + 1) begin : input_pack
+                assign neuron_weights[n][i*BITWIDTH +: BITWIDTH] = w_mem[n*NUM_INPUTS + i];
             end
         end
     endgenerate
 
-    // instantiate LIF neurons
+    // Instantiate LIF neurons
     generate
         for (n = 0; n < NUM_NEURONS; n = n + 1) begin : neuron_array
             lif #(
@@ -43,7 +46,7 @@ module snn_layer #(
                 .clk      (clk),
                 .rst      (rst),
                 .spike_in (spike_in),
-                .weights  (weights[n]),
+                .weights  (neuron_weights[n]),
                 .spike_out(spike_out[n])
             );
         end
